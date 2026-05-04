@@ -5,6 +5,7 @@ services:
   - type: web
     name: interim-assessment-api
     runtime: node
+    rootDir: .
     region: oregon
     plan: free
     branch: main
@@ -14,6 +15,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
