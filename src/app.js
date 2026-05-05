@@ -8,30 +8,17 @@ const cryptoRoutes = require("./routes/cryptoRoutes");
 
 const app = express();
 
-const parseAllowedOrigins = () =>
-  (process.env.FRONTEND_URL || "http://localhost:5173")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+// CORS: set FRONTEND_URL on Render (your Netlify URL). Comma-separate multiple origins.
+// credentials: true is required for HTTP-only auth cookies from the browser.
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+const allowedOrigins = frontendUrl
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
-    origin(origin, callback) {
-      const allowed = parseAllowedOrigins();
-      if (!origin) {
-        return callback(null, true);
-      }
-      if (allowed.includes(origin)) {
-        return callback(null, true);
-      }
-      if (process.env.NODE_ENV !== "production" && /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) {
-        return callback(null, true);
-      }
-      if (process.env.NODE_ENV !== "production" && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
-        return callback(null, true);
-      }
-      return callback(null, false);
-    },
+    origin: allowedOrigins.length === 1 ? allowedOrigins[0] : allowedOrigins,
     credentials: true,
   })
 );

@@ -21,7 +21,33 @@ const startServer = async () => {
       hasJwtSecret: Boolean(process.env.JWT_SECRET),
       port: PORT,
     });
-    await connectDB();
+    // Render deploys can fail fast if Atlas IP allowlisting hasn’t propagated yet.
+    // Retry a few times before giving up.
+    const maxAttempts = 8;
+    const sleepMs = 5000;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await connectDB();
+        lastError = null;
+        break;
+      } catch (e) {
+        lastError = e;
+        console.error(`MongoDB connection attempt ${attempt}/${maxAttempts} failed:`, e.message);
+        if (attempt < maxAttempts) {
+          await new Promise((r) => setTimeout(r, sleepMs));
+        }
+      }
+    }
+
+    if (lastError) {
+      console.error(
+        "MongoDB connection still failing after retries. Starting server anyway; endpoints requiring DB will fail until DB is reachable.",
+        lastError.message
+      );
+    }
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
