@@ -30,8 +30,8 @@ app.get("/", (_req, res) => {
   res.status(200).json({ message: "Backend API is running." });
 });
 
-app.use("/", authRoutes);
-app.use("/crypto", cryptoRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/crypto", cryptoRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
